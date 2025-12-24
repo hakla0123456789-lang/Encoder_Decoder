@@ -108,4 +108,5 @@ def decode_msg(encoded_msg, key):  # CORRECTED: 'key' parameter
         return f"Error in decoding: {str(e)}. Make sure it's a valid encoded message."
 
 if __name__ == "__main__":
-    app.run(debug=True)
+      port = int(os.environ.get("PORT", 5000))
+      app.run(host="0.0.0.0", port=port)
