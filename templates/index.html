@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Message Encoder/Decoder</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 1px,
+          transparent 1px
+        );
+        background-size: 20px 20px;
+        animation: float 20s linear infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
+      .form-container {
+        padding: 40px;
+      }
+
+      .input-group {
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #4f46e5;
+        font-size: 1.1rem;
+      }
+
+      .input-group input[type="text"] {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .input-group input[type="text"]:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .input-group input[type="text"]::placeholder {
+        color: #9ca3af;
+      }
+
+      .radio-group {
+        margin-bottom: 30px;
+      }
+
+      .radio-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #4f46e5;
+        font-size: 1.1rem;
+      }
+
+      .radio-options {
+        display: flex;
+        gap: 30px;
+        margin-top: 10px;
+      }
+
+      .radio-option {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .radio-option input[type="radio"] {
+        display: none;
+      }
+
+      .radio-custom {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #d1d5db;
+        border-radius: 50%;
+        margin-right: 10px;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .radio-custom::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: #4f46e5;
+        border-radius: 50%;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      input[type="radio"]:checked + .radio-custom {
+        border-color: #4f46e5;
+      }
+
+      input[type="radio"]:checked + .radio-custom::after {
+        opacity: 1;
+      }
+
+      .radio-option span {
+        font-size: 1rem;
+        color: #374151;
+      }
+
+      .submit-btn {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+      }
+
+      .submit-btn:active {
+        transform: translateY(0);
+      }
+
+      .result-container {
+        margin-top: 40px;
+        padding: 25px;
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border-radius: 15px;
+        border-left: 5px solid #4f46e5;
+        display: none;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .result-container.show {
+        display: block;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .result-header h2 {
+        color: #1e40af;
+        font-size: 1.5rem;
+      }
+
+      .copy-btn {
+        background: #4f46e5;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .copy-btn:hover {
+        background: #4338ca;
+        transform: translateY(-2px);
+      }
+
+      .result-text {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        word-break: break-all;
+        border: 1px solid #dbeafe;
+        color: #1f2937;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #6b7280;
+        font-size: 0.9rem;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 20px;
+      }
+
+      .footer a {
+        color: #4f46e5;
+        text-decoration: none;
+      }
+
+      .security-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        border-left: 4px solid #f59e0b;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          max-width: 95%;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .form-container {
+          padding: 25px;
+        }
+
+        .radio-options {
+          flex-direction: column;
+          gap: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><i class="fas fa-lock"></i> Secure Message Encoder/Decoder</h1>
+        <p>Protect your messages with advanced encoding techniques</p>
+      </div>
+
+      <div class="form-container">
+        <form method="POST">
+          <div class="security-note">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+              <strong>Security Note:</strong> Your message is encoded using a
+              secure algorithm with your secret key. Keep your key safe!
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="message"
+              ><i class="fas fa-envelope"></i> Enter your secret message:</label
+            >
+            <input
+              type="text"
+              id="message"
+              name="message"
+              placeholder="Type your message here..."
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="keys"
+              ><i class="fas fa-key"></i> Enter your encryption key:</label
+            >
+            <input
+              type="text"
+              id="keys"
+              name="keys"
+              placeholder="Enter a secret key (letters, numbers, symbols)..."
+              required
+            />
+          </div>
+
+          <div class="radio-group">
+            <label><i class="fas fa-cogs"></i> Choose operation:</label>
+            <div class="radio-options">
+              <label class="radio-option">
+                <input
+                  type="radio"
+                  id="encode"
+                  name="operation"
+                  value="encode"
+                  checked
+                />
+                <span class="radio-custom"></span>
+                <span><i class="fas fa-lock"></i> Encode</span>
+              </label>
+
+              <label class="radio-option">
+                <input
+                  type="radio"
+                  id="decode"
+                  name="operation"
+                  value="decode"
+                />
+                <span class="radio-custom"></span>
+                <span><i class="fas fa-unlock"></i> Decode</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-bolt"></i> Process Message
+          </button>
+        </form>
+
+        {% if result %}
+        <div class="result-container show">
+          <div class="result-header">
+            <h2><i class="fas fa-check-circle"></i> Result</h2>
+            <button class="copy-btn" onclick="copyToClipboard()">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div class="result-text">{{ result }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="footer">
+        <p>
+          Made with <i class="fas fa-heart" style="color: #ef4444"></i> | Secure
+          Message Tool v1.0
+        </p>
+        <p>
+          Use responsibly. Keep your keys safe and never share encoded messages
+          without the key.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      function copyToClipboard() {
+        const resultText = "{{ result }}";
+        navigator.clipboard.writeText(resultText)
+          .then(() => {
+            const btn = document.querySelector('.copy-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = '#10b981';
+
+            setTimeout(() => {
+              btn.innerHTML = originalHTML;
+              btn.style.background = '#4f46e5';
+            }, 2000);
+          })
+          .catch(err => {
+            alert('Failed to copy: ' + err);
+          });
+      }
+
+      // Add animation to form inputs
+      document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"]');
+        inputs.forEach(input => {
+          input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+          });
+
+          input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+          });
+        });
+
+        // Auto-hide result after 30 seconds (optional)
+        {% if result %}
+        setTimeout(() => {
+          const resultContainer = document.querySelector('.result-container');
+          if (resultContainer) {
+            resultContainer.style.opacity = '0.7';
+          }
+        }, 30000);
+        {% endif %}
+      });
+    </script>
+  </body>
+</html>
